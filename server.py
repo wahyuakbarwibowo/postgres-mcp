@@ -11,8 +11,8 @@ Env: DATABASE_URL (contoh: postgresql://user:pass@localhost:5432/db)
 import os
 import re
 
-import psycopg
 from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
 from mcp.server.mcpserver import MCPServer
 
 mcp = MCPServer("postgres")
@@ -24,8 +24,29 @@ BLOCKED = re.compile(
 DELETE_RE = re.compile(r"\bdelete\b", re.IGNORECASE)
 
 
+# ponytail: pool kecil & hemat — min 0 koneksi saat idle, maks 2, koneksi
+# nganggur ditutup setelah 60 detik supaya tidak makan memory server DB.
+pool = ConnectionPool(
+    os.environ.get("DATABASE_URL", ""),
+    min_size=0,
+    max_size=2,
+    max_idle=60,
+    open=False,
+    kwargs={
+        "row_factory": dict_row,
+        "application_name": "postgres-mcp",
+        # query macet dibunuh 30s, transaksi nganggur dibunuh 10s
+        "options": "-c statement_timeout=30000 -c idle_in_transaction_session_timeout=10000",
+    },
+)
+
+MAX_ROWS = 500
+
+
 def _connect():
-    return psycopg.connect(os.environ["DATABASE_URL"], row_factory=dict_row)
+    if pool.closed:
+        pool.open()
+    return pool.connection()
 
 
 @mcp.tool()
@@ -36,7 +57,7 @@ def query(sql: str) -> list[dict]:
     with _connect() as conn:
         conn.execute("SET TRANSACTION READ ONLY")
         cur = conn.execute(sql)
-        return cur.fetchall() if cur.description else []
+        return cur.fetchmany(MAX_ROWS) if cur.description else []
 
 
 @mcp.tool()

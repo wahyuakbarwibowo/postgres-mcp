@@ -14,7 +14,7 @@ MCP server Postgres dengan guard destruktif:
 Perintah dasar untuk menjalankan server (dipakai semua client di bawah):
 
 ```bash
-uv run --no-project --with "mcp[cli]",psycopg python /path/to/postgres-mcp/server.py
+uv run --no-project --with "mcp[cli]",psycopg,psycopg-pool python /path/to/postgres-mcp/server.py
 ```
 
 Ganti `/path/to/postgres-mcp` dengan lokasi clone kamu.
@@ -23,7 +23,7 @@ Ganti `/path/to/postgres-mcp` dengan lokasi clone kamu.
 
 ```bash
 claude mcp add postgres --env DATABASE_URL=postgresql://user:pass@localhost:5432/db \
-  -- uv run --no-project --with "mcp[cli]",psycopg python /path/to/postgres-mcp/server.py
+  -- uv run --no-project --with "mcp[cli]",psycopg,psycopg-pool python /path/to/postgres-mcp/server.py
 ```
 
 Atau lewat `.mcp.json` di root project:
@@ -33,7 +33,7 @@ Atau lewat `.mcp.json` di root project:
   "mcpServers": {
     "postgres": {
       "command": "uv",
-      "args": ["run", "--no-project", "--with", "mcp[cli],psycopg", "python", "/path/to/postgres-mcp/server.py"],
+      "args": ["run", "--no-project", "--with", "mcp[cli],psycopg,psycopg-pool", "python", "/path/to/postgres-mcp/server.py"],
       "env": { "DATABASE_URL": "postgresql://user:pass@localhost:5432/db" }
     }
   }
@@ -47,7 +47,7 @@ Tambahkan ke `~/.codex/config.toml`:
 ```toml
 [mcp_servers.postgres]
 command = "uv"
-args = ["run", "--no-project", "--with", "mcp[cli],psycopg", "python", "/path/to/postgres-mcp/server.py"]
+args = ["run", "--no-project", "--with", "mcp[cli],psycopg,psycopg-pool", "python", "/path/to/postgres-mcp/server.py"]
 
 [mcp_servers.postgres.env]
 DATABASE_URL = "postgresql://user:pass@localhost:5432/db"
@@ -57,7 +57,7 @@ Atau via CLI:
 
 ```bash
 codex mcp add postgres --env DATABASE_URL=postgresql://user:pass@localhost:5432/db \
-  -- uv run --no-project --with "mcp[cli],psycopg" python /path/to/postgres-mcp/server.py
+  -- uv run --no-project --with "mcp[cli],psycopg,psycopg-pool" python /path/to/postgres-mcp/server.py
 ```
 
 ## OpenCode
@@ -70,7 +70,7 @@ Tambahkan ke `opencode.json` (project) atau `~/.config/opencode/opencode.json` (
   "mcp": {
     "postgres": {
       "type": "local",
-      "command": ["uv", "run", "--no-project", "--with", "mcp[cli],psycopg", "python", "/path/to/postgres-mcp/server.py"],
+      "command": ["uv", "run", "--no-project", "--with", "mcp[cli],psycopg,psycopg-pool", "python", "/path/to/postgres-mcp/server.py"],
       "environment": { "DATABASE_URL": "postgresql://user:pass@localhost:5432/db" },
       "enabled": true
     }
@@ -87,7 +87,7 @@ Buka **MCP Servers → Edit MCP Settings** (global: `mcp_settings.json`, atau pe
   "mcpServers": {
     "postgres": {
       "command": "uv",
-      "args": ["run", "--no-project", "--with", "mcp[cli],psycopg", "python", "/path/to/postgres-mcp/server.py"],
+      "args": ["run", "--no-project", "--with", "mcp[cli],psycopg,psycopg-pool", "python", "/path/to/postgres-mcp/server.py"],
       "env": { "DATABASE_URL": "postgresql://user:pass@localhost:5432/db" }
     }
   }
@@ -97,5 +97,5 @@ Buka **MCP Servers → Edit MCP Settings** (global: `mcp_settings.json`, atau pe
 ## Test
 
 ```bash
-uv run --no-project --with "mcp[cli]",psycopg python test_guard.py
+uv run --no-project --with "mcp[cli]",psycopg,psycopg-pool python test_guard.py
 ```
