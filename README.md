@@ -1,23 +1,33 @@
 # postgres-mcp
 
-MCP server Postgres dengan guard destruktif:
+MCP server minimal untuk mengakses PostgreSQL dari client MCP dengan guard
+untuk operasi yang berisiko.
 
-- `query` — read-only (SELECT/EXPLAIN), dijalankan dalam transaksi `READ ONLY`.
-- `execute` — INSERT/UPDATE/DELETE wajib `confirm=true`; client harus minta persetujuan user dulu.
-- `TRUNCATE`, `DROP DATABASE/TABLE/SCHEMA`, `ALTER TABLE ... DROP` diblokir permanen, tidak bisa di-confirm.
+## Fitur
+
+- `query` menjalankan SQL dalam transaksi `READ ONLY` dan mengembalikan maksimal
+  500 baris.
+- `execute` memerlukan `confirm=true` sebelum menjalankan perubahan data.
+- `TRUNCATE`, `DROP DATABASE/TABLE/SCHEMA`, dan `ALTER TABLE ... DROP` selalu
+  diblokir dan tidak dapat di-confirm.
+- Query dan transaksi memiliki timeout untuk mencegah koneksi macet.
+
+`query` bergantung pada PostgreSQL untuk menolak operasi tulis karena transaksi
+read-only. Client tetap perlu memvalidasi SQL dan meminta persetujuan user untuk
+operasi yang mengubah data.
 
 ## Prasyarat
 
 - [uv](https://docs.astral.sh/uv/) terinstall (dependency di-resolve otomatis saat run).
 - Env `DATABASE_URL`, contoh: `postgresql://user:pass@localhost:5432/db`
 
-Perintah dasar untuk menjalankan server (dipakai semua client di bawah):
+Jalankan server secara langsung:
 
 ```bash
 uv run --no-project --with "mcp[cli]",psycopg,psycopg-pool python /path/to/postgres-mcp/server.py
 ```
 
-Ganti `/path/to/postgres-mcp` dengan lokasi clone kamu.
+Ganti `/path/to/postgres-mcp` dengan lokasi clone.
 
 ## Claude Code
 
@@ -94,7 +104,7 @@ Buka **MCP Servers → Edit MCP Settings** (global: `mcp_settings.json`, atau pe
 }
 ```
 
-## Test
+## Pengujian
 
 ```bash
 uv run --no-project --with "mcp[cli]",psycopg,psycopg-pool python test_guard.py
